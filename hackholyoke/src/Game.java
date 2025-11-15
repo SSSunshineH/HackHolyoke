@@ -5,49 +5,87 @@ import GaFr.Gfx;
 import GaFr.GFU;
 import GaFr.GFM;
 import GaFr.Easings;
+import java.util.ArrayList;
+
 
 public class Game extends GFGame
 {
-  {
-    Gfx.clearColor(Gfx.Color.BLACK);
-  }
-
-  GFStamp logo = new GFStamp("gafr/deps/GaFrLogo.png").centerPin();
   GFFont font = new GFFont("gafr/fonts/spleen/spleen-32x64.ffont.json");
+  GFStamp Dish;
+  ArrayList<Dish> dishes = new ArrayList<>();
+  public static final int posX = 32;
 
-  double x = WIDTH/2;
-  double y = HEIGHT/2;
-  double vx = Math.random() * 10 - 5;
-  double vy = Math.random() * 10 - 5;
-
-  float hue = 0;
-
-  protected double reflect (double v)
-  {
-    v = -v;
-    if      (Math.random() < 0.1 && Math.abs(v) > 4) v -= Math.signum(v);
-    else if (Math.random() < 0.1 && Math.abs(v) < 7) v += Math.signum(v);
-    return v;
-  }
+  //load the image - 5 types of dishes
+  GFStamp blackBowl= new GFStamp("assets/black bowl.png").rescale(0.15, 0.15);
+  GFStamp blackPlate= new GFStamp("assets/black plate-pixel.png").rescale(0.15, 0.15);
+  GFStamp whiteCup= new GFStamp("assets/black plate-pixel.png").rescale(0.15, 0.15);
+  GFStamp whiteRoundPlate = new GFStamp("assets/white round plate.png").rescale(0.15, 0.15);
+  GFStamp whiteSquarePlate = new GFStamp("assets/square plate.png").rescale(0.15, 0.15);
+  
 
   @Override
+  /*initialize the game */
+  public void onStartup() {
+    HEIGHT = 500;
+    WIDTH = 800;
+
+
+    //randomize and initialize new dishes of different types, and add to the arraylist
+    for (int j =0; j < 10; j++){
+      int typeDish = GFM.randint(1,5);
+      switch (typeDish){
+      case 1:
+      dishes.add(new Dish(1, j*100));
+      break;
+      case 2:
+      dishes.add(new Dish(2, j*100));
+      break;
+      case 3:
+      dishes.add(new Dish(3, j*100));
+      break;
+      case 4:
+      dishes.add(new Dish(4, j*100));
+      break;
+      case 5:
+      dishes.add(new Dish(5, j*100));
+      break;
+    }
+    }
+    //reset();
+  }
+
+
+  @Override
+  /*draw the frame */
   public void onDraw (int frameCount)
   {
-    hue += 0.001;
-    font.color = java.awt.Color.HSBtoRGB(hue, 1, 1);
+    for (Dish dish : dishes){
+      dish.update(frameCount);
+    }
 
-    // Bounce in the welcome message
-    float p = GFM.unscaleClampf(frameCount/60f, 0, 3); // p goes from 0 to 1 in three seconds
-    float p2 = Easings.easeOutBounce.easef(p); // p2 "bounces" from 0 to 1
-    float ypos = GFM.scalef(p2, -30, HEIGHT-80); // bounce from -30 to HEIGHT-80
-    font.draw(128+16, ypos, "Welcome to GaFr!");
+    //update dish status for every count of timer
+      for (Dish dish : dishes){
+        if (frameCount >= dish.appearTime){
+          switch(dish.type){
+            case 1:
+            blackBowl.moveTo(dish.posY,posX).stamp();
+            break;
+            case 2:
+            blackPlate.moveTo(dish.posY,posX).stamp();
+            break;
+            case 3:
+            whiteCup.moveTo(dish.posY,posX).stamp();
+            break;
+            case 4:
+            whiteRoundPlate.moveTo(dish.posY,posX).stamp();
+            break;
+            case 5:
+            whiteSquarePlate.moveTo(dish.posY,posX).stamp();
+            break;
+          }
+        }
 
-    logo.moveTo( (int)x, (int)y ).stamp();
-    x += vx;
-    y += vy;
-    if (x < logo.width/2)              { x = logo.width/2;         vx = reflect(vx); }
-    else if (x > WIDTH-logo.width/2)   { x = WIDTH-logo.width/2;   vx = reflect(vx); }
-    if (y < logo.height/2)             { y = logo.height/2;        vy = reflect(vy); }
-    else if (y > HEIGHT-logo.height/2) { y = HEIGHT-logo.height/2; vy = reflect(vy); }
+      }
   }
+
 }
